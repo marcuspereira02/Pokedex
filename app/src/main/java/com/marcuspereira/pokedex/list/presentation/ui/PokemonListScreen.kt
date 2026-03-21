@@ -38,37 +38,35 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import coil.request.ImageRequest
 import com.marcuspereira.pokedex.R
 import com.marcuspereira.pokedex.components.ERSearchBar
 import com.marcuspereira.pokedex.list.presentation.PokemonListViewModel
 
 @Composable
-fun PokemonListScreen(viewModel: PokemonListViewModel) {
+fun PokemonListScreen(viewModel: PokemonListViewModel, navController: NavHostController) {
 
     val listPokemon by viewModel.uiAllPokemon.collectAsState()
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color(0xFF121212)
-    ) {
-        PokemonListContent(
-            pokemonListUiState = listPokemon,
-            onClick = {
 
-            },
-            onSearchClicked = { query ->
-                val tempCleanQuery = query.trim()
-                if (tempCleanQuery.isNotEmpty()) {
+    PokemonListContent(
+        pokemonListUiState = listPokemon,
+        onClick = { itemClicked ->
+            navController.navigate(route = "pokemonDetail/${itemClicked.id}")
 
-                }
+        },
+        onSearchClicked = { query ->
+            val tempCleanQuery = query.trim()
+            if (tempCleanQuery.isNotEmpty()) {
 
             }
 
-        )
-    }
+        }
 
+    )
 }
+
 
 @Composable
 private fun PokemonListContent(
@@ -76,7 +74,7 @@ private fun PokemonListContent(
     onClick: (PokemonListUiData) -> Unit,
     onSearchClicked: (String) -> Unit,
 
-) {
+    ) {
 
     Column(modifier = Modifier.fillMaxSize()) {
 

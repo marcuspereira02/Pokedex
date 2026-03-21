@@ -9,7 +9,7 @@ import com.marcuspereira.pokedex.detail.data.DetailService
 import com.marcuspereira.pokedex.detail.data.PokemonDetailDto
 import com.marcuspereira.pokedex.detail.presentation.ui.PokemonDetailUiData
 import com.marcuspereira.pokedex.detail.presentation.ui.PokemonDetailUiState
-import com.marcuspereira.pokedex.detail.presentation.ui.PokemonStatUiData
+import com.marcuspereira.pokedex.detail.presentation.ui.PokemonStatsUiData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +35,7 @@ class PokemonDetailViewModel(
                     val pokemon = response.body()
                     if (pokemon != null) {
                         val pokemonUiData = converterPokemonDto(pokemon)
-                        _uiPokemon.value = PokemonDetailUiState(pokemon = pokemonUiData)
+                        _uiPokemon.value = PokemonDetailUiState(data = pokemonUiData)
                     }
                 } else {
                     _uiPokemon.value = PokemonDetailUiState(isError = true)
@@ -63,11 +63,12 @@ class PokemonDetailViewModel(
             PokemonDetailUiData(
                 id = pokemonDto.id,
                 name = pokemonDto.name,
+                image = pokemonDto.imageUrl,
                 types = pokemonDto.types.map { it.type.name },
                 weight = pokemonDto.weight,
                 height = pokemonDto.height,
                 stats = pokemonDto.stats.map {
-                    PokemonStatUiData(
+                    PokemonStatsUiData(
                         name = it.stat.name,
                         value = it.baseStat
                     )
