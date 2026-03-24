@@ -9,15 +9,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import com.marcuspereira.pokedex.detail.presentation.PokemonDetailViewModel
+import com.marcuspereira.pokedex.detail.PokemonDetailViewModel
 import com.marcuspereira.pokedex.list.presentation.PokemonListViewModel
+import com.marcuspereira.pokedex.search.PokemonSearchViewModel
 import com.marcuspereira.pokedex.ui.theme.PokedexTheme
 import kotlin.getValue
 
 class MainActivity : ComponentActivity() {
 
     private val listViewModel by viewModels<PokemonListViewModel> { PokemonListViewModel.factory }
-    private val detailViewModel by viewModels<PokemonDetailViewModel>{ PokemonDetailViewModel.factory }
+    private val detailViewModel by viewModels<PokemonDetailViewModel> { PokemonDetailViewModel.factory }
+    private val searchViewModel by viewModels<PokemonSearchViewModel> { PokemonSearchViewModel.factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,10 +30,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                  PokedexApp(
-                      listViewModel,
-                      detailViewModel
-                  )
+                    PokedexApp(
+                        listViewModel,
+                        detailViewModel,
+                        searchViewModel
+                    )
                 }
             }
         }

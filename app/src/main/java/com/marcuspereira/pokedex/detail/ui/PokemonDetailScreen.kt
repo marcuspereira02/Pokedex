@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -42,9 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.luminance
 import coil.request.ImageRequest
 import com.marcuspereira.pokedex.common.utils.extractColorFromDrawable
-import com.marcuspereira.pokedex.detail.presentation.PokemonDetailViewModel
-import com.marcuspereira.pokedex.detail.presentation.ui.PokemonDetailUiData
-import com.marcuspereira.pokedex.ui.theme.PokedexTheme
+import com.marcuspereira.pokedex.detail.PokemonDetailViewModel
 
 @Composable
 fun PokemonDetailScreen(
@@ -376,15 +373,4 @@ private fun abbreviateStatName(name: String): String {
         "speed" -> "SPD"
         else -> name
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PokemonDetailPreview(modifier: Modifier = Modifier) {
-
-    PokedexTheme() {
-
-
-    }
-
 }

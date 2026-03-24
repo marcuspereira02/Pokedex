@@ -1,7 +1,6 @@
-package com.marcuspereira.pokedex.detail.data
+package com.marcuspereira.pokedex.common.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
-
 
 data class PokemonDetailDto(
     val id: Int,

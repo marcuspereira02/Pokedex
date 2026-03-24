@@ -59,11 +59,9 @@ fun PokemonListScreen(viewModel: PokemonListViewModel, navController: NavHostCon
         onSearchClicked = { query ->
             val tempCleanQuery = query.trim()
             if (tempCleanQuery.isNotEmpty()) {
-
+                navController.navigate(route = "searchScreen/${tempCleanQuery}")
             }
-
         }
-
     )
 }
 
@@ -173,7 +171,10 @@ private fun PokemonList(
 }
 
 @Composable
-private fun PokemonCard(pokemon: PokemonListUiData, onClick: (PokemonListUiData) -> Unit) {
+private fun PokemonCard(
+    pokemon: PokemonListUiData,
+    onClick: (PokemonListUiData) -> Unit
+) {
 
     var backgroundColor by remember { mutableStateOf(Color.White) }
     Card(

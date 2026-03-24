@@ -1,4 +1,4 @@
-package com.marcuspereira.pokedex.common.data.remote
+package com.marcuspereira.pokedex.common.data.remote.api
 
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

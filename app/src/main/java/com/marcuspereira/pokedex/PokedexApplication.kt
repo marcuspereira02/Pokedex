@@ -3,7 +3,7 @@ package com.marcuspereira.pokedex
 import android.app.Application
 import androidx.room.Room
 import com.marcuspereira.pokedex.common.data.local.PokedexDataBase
-import com.marcuspereira.pokedex.common.data.remote.RetrofitClient
+import com.marcuspereira.pokedex.common.data.remote.api.RetrofitClient
 import com.marcuspereira.pokedex.list.data.ListRepository
 import com.marcuspereira.pokedex.list.data.local.PokemonListLocalDataSource
 import com.marcuspereira.pokedex.list.data.remote.ListService

@@ -1,4 +1,4 @@
-package com.marcuspereira.pokedex.detail.presentation.ui
+package com.marcuspereira.pokedex.detail.ui
 
 data class PokemonDetailUiState(
     val data : PokemonDetailUiData? = null,
