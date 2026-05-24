@@ -27,7 +27,6 @@ class PokemonListRemoteDataSource(
         } catch (ex: Exception) {
             ex.printStackTrace()
             Result.failure(ex)
-
         }
     }
 }

@@ -1,7 +1,5 @@
 package com.marcuspereira.pokedex.list.presentation.ui
 
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,11 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.palette.graphics.Palette
 import coil.compose.AsyncImage
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.request.ImageRequest
 import com.marcuspereira.pokedex.R
+import com.marcuspereira.pokedex.common.utils.extractColorFromDrawable
 import com.marcuspereira.pokedex.components.ERSearchBar
 import com.marcuspereira.pokedex.list.presentation.PokemonListViewModel
 
@@ -109,7 +106,6 @@ private fun PokemonListContent(
             onSearchClicked = onSearchClicked
         )
         PokemonListContentGate(pokemonListUiState = pokemonListUiState, onClick = onClick)
-
     }
 }
 
@@ -215,12 +211,4 @@ private fun PokemonCard(
             )
         }
     }
-}
-
-private fun extractColorFromDrawable(drawable: Drawable): Color {
-    val bitmap = (drawable as BitmapDrawable).bitmap
-    val palette = Palette.from(bitmap).generate()
-
-    val swatch = palette.dominantSwatch ?: palette.vibrantSwatch
-    return swatch?.let { Color(it.rgb) } ?: Color.LightGray
 }

@@ -10,6 +10,5 @@ data class PokemonSearchUiState(
 data class PokemonSearchUiData(
     val id: Int,
     val image: String,
-    val name: String,
-    val types: List<String>
+    val name: String
 )

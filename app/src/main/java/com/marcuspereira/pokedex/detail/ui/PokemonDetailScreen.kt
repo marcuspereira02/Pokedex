@@ -2,14 +2,18 @@ package com.marcuspereira.pokedex.detail.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -19,7 +23,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,9 +41,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.draw.clip
 import coil.request.ImageRequest
 import com.marcuspereira.pokedex.common.utils.extractColorFromDrawable
+import com.marcuspereira.pokedex.common.utils.getTextColor
 import com.marcuspereira.pokedex.detail.PokemonDetailViewModel
 
 @Composable
@@ -122,8 +126,6 @@ private fun PokemonDetailContent(
     pokemon: PokemonDetailUiData?,
     name: String
 ) {
-
-
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -158,7 +160,6 @@ private fun PokemonDetailContent(
 
         StatusBars(pokemon)
     }
-
 }
 
 @Composable
@@ -166,31 +167,74 @@ private fun StatusBars(
     pokemon: PokemonDetailUiData?,
 ) {
 
+    val maxStat = 300f
+
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier.padding(16.dp)
     ) {
 
         Text(
-            modifier = Modifier.padding(top = 16.dp),
             text = "Base Stats",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 12.dp)
         )
 
         pokemon?.stats?.forEach { stat ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(text = abbreviateStatName(stat.name))
-                Spacer(Modifier.size(8.dp))
-                LinearProgressIndicator(
-                    progress = stat.value / 100f,
-                    modifier = Modifier.fillMaxWidth()
-                )
+
+            val progress = ((stat.value / maxStat) * 1.5f).coerceIn(0.2f, 1f)
+
+            val statColor = when (stat.name.lowercase()) {
+                "hp" -> Color(0xFFE53935)
+                "attack" -> Color(0xFFFF9800)
+                "defense" -> Color(0xFF2196F3)
+                "special-attack" -> Color(0xFF90CAF9)
+                "special-defense" -> Color(0xFF4CAF50)
+                "speed" -> Color(0xFFAB47BC)
+                else -> Color.Gray
             }
 
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp)
+            ) {
+
+                Text(
+                    text = abbreviateStatName(stat.name),
+                    modifier = Modifier.width(45.dp),
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(22.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.White)
+                ) {
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(progress)
+                            .clip(RoundedCornerShape(50))
+                            .background(statColor),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${stat.value}/${maxStat.toInt()}",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -221,7 +265,6 @@ private fun PokemonMeasurements(value: Int, title: String) {
             fontSize = 14.sp
         )
     }
-
 }
 
 @Composable
@@ -239,11 +282,12 @@ private fun ChipsTypes(pokemon: PokemonDetailUiData?) {
 
             Surface(
                 shape = RoundedCornerShape(50),
-                color = background
+                color = background,
+                modifier = Modifier.height(26.dp)
             ) {
                 Text(
                     text = type.replaceFirstChar { it.uppercase() },
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp),
                     fontWeight = FontWeight.SemiBold,
                     color = textColor
                 )
@@ -266,11 +310,11 @@ private fun PokemonCard(pokemon: PokemonDetailUiData?) {
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
-        Column(
+
+        Box(
             modifier = Modifier
                 .padding(8.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
         ) {
 
             AsyncImage(
@@ -280,11 +324,23 @@ private fun PokemonCard(pokemon: PokemonDetailUiData?) {
                     .crossfade(true)
                     .build(),
                 contentDescription = "${pokemon?.name} Image",
-                modifier = Modifier.size(250.dp),
+                modifier = Modifier
+                    .size(250.dp)
+                    .align(Alignment.Center),
                 onSuccess = {
                     val drawable = it.result.drawable
                     backgroundColor = extractColorFromDrawable(drawable)
                 }
+            )
+
+            Text(
+                text = String.format("#%03d", pokemon?.id ?: 0),
+                fontSize = 20.sp,
+                color = getTextColor(backgroundColor),
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 12.dp, top = 8.dp)
             )
 
         }
@@ -352,14 +408,6 @@ private fun getTypeColor(type: String): Color {
     )
 
     return typeColors[type.lowercase()] ?: Color.LightGray
-}
-
-private fun getTextColor(background: Color): Color {
-    return if (background.luminance() < 0.5f) {
-        Color.White
-    } else {
-        Color.Black
-    }
 }
 
 private fun abbreviateStatName(name: String): String {

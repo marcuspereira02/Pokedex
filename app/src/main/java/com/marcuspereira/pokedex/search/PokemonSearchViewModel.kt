@@ -60,8 +60,7 @@ class PokemonSearchViewModel(
             PokemonSearchUiData(
                 id = pokemonDto.id,
                 name = pokemonDto.name,
-                image = pokemonDto.imageUrl,
-                types = pokemonDto.types.map { it.type.name },
+                image = pokemonDto.imageUrl
             )
 
         return pokemonUiData

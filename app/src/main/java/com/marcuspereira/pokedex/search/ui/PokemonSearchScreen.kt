@@ -17,7 +17,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +39,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.marcuspereira.pokedex.common.utils.extractColorFromDrawable
+import com.marcuspereira.pokedex.common.utils.getTextColor
 import com.marcuspereira.pokedex.search.PokemonSearchViewModel
 
 @Composable
@@ -86,16 +86,6 @@ private fun PokemonSearchContent(
             pokemonSearchUiData,
             onClick
         )
-    }
-
-
-}
-
-private fun getTextColor(background: Color): Color {
-    return if (background.luminance() < 0.5f) {
-        Color.White
-    } else {
-        Color.Black
     }
 }
 
@@ -194,5 +184,4 @@ private fun PokemonSearchHeader(
             text = queryFormatted
         )
     }
-
 }
