@@ -25,9 +25,10 @@ class PokemonSearchViewModel(
     fun fetchPokemon(
         id: String
     ) {
-        try {
-            _uiPokemon.value = PokemonSearchUiState(isLoading = true)
-            viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                _uiPokemon.value = PokemonSearchUiState(isLoading = true)
+
                 val response = service.getDetailPokemon(id)
                 if (response.isSuccessful) {
                     val data = response.body()
@@ -35,21 +36,31 @@ class PokemonSearchViewModel(
                         val pokemonUiData = converterPokemonDto(data)
                         _uiPokemon.value = PokemonSearchUiState(data = pokemonUiData)
                     }
+
+                } else if (response.code() == 404) {
+
+                    _uiPokemon.value = PokemonSearchUiState(
+                        isError = true,
+                        errorMessage = "No Pokémon found. Please try again."
+                    )
+
                 } else {
                     _uiPokemon.value = PokemonSearchUiState(isError = true)
                 }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            if (ex is UnknownHostException) {
-                _uiPokemon.value = PokemonSearchUiState(
-                    isError = true,
-                    errorMessage = "Not internet connection"
-                )
-            } else {
-                _uiPokemon.value = PokemonSearchUiState(
-                    isError = true
-                )
+
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                if (ex is UnknownHostException) {
+                    _uiPokemon.value = PokemonSearchUiState(
+                        isError = true,
+                        errorMessage = "Not internet connection"
+                    )
+
+                } else {
+                    _uiPokemon.value = PokemonSearchUiState(
+                        isError = true
+                    )
+                }
             }
         }
     }
@@ -62,7 +73,6 @@ class PokemonSearchViewModel(
                 name = pokemonDto.name,
                 image = pokemonDto.imageUrl
             )
-
         return pokemonUiData
     }
 

@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +46,6 @@ import com.marcuspereira.pokedex.list.presentation.PokemonListViewModel
 fun PokemonListScreen(viewModel: PokemonListViewModel, navController: NavHostController) {
 
     val listPokemon by viewModel.uiAllPokemon.collectAsState()
-
 
     PokemonListContent(
         pokemonListUiState = listPokemon,
@@ -131,13 +131,8 @@ private fun PokemonListContentGate(
     onClick: (PokemonListUiData) -> Unit
 ) {
     if (pokemonListUiState.isLoading) {
-        Text(
-            modifier = Modifier.padding(16.dp),
-            text = "Loading...",
-            fontWeight = FontWeight.SemiBold
-        )
+        CircularProgressIndicator()
     } else if (pokemonListUiState.isError) {
-
         Text(
             modifier = Modifier.padding(16.dp),
             text = pokemonListUiState.errorMessage,
