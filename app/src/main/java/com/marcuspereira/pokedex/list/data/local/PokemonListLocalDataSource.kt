@@ -4,22 +4,22 @@ import com.marcuspereira.pokedex.common.data.local.PokemonDao
 import com.marcuspereira.pokedex.common.data.local.PokemonEntity
 import com.marcuspereira.pokedex.common.model.Pokemon
 
-class PokemonListLocalDataSource(private val dao : PokemonDao){
+class PokemonListLocalDataSource(private val dao: PokemonDao) : LocalListDataSource {
 
-    suspend fun getPokemonList() : List<Pokemon>{
+    override suspend fun getPokemonList(): List<Pokemon> {
 
         val entities = dao.getPokemonList()
 
         return entities.map { pokemonEntities ->
-           Pokemon(
-               id = pokemonEntities.id,
-               name = pokemonEntities.name,
-               image = pokemonEntities.image
-           )
+            Pokemon(
+                id = pokemonEntities.id,
+                name = pokemonEntities.name,
+                image = pokemonEntities.image
+            )
         }
     }
 
-    suspend fun updateLocalItems(pokemon: List<Pokemon>){
+    override suspend fun updateLocalItems(pokemon: List<Pokemon>) {
 
         val entities = pokemon.map { pokemon ->
             PokemonEntity(

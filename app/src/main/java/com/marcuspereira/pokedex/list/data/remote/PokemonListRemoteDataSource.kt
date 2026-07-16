@@ -6,9 +6,9 @@ import com.marcuspereira.pokedex.common.model.Pokemon
 
 class PokemonListRemoteDataSource(
     private val listService: ListService
-) {
+) : RemoteListDataSource {
 
-    suspend fun getPokemonList(): Result<List<Pokemon>?> {
+    override suspend fun getPokemonList(): Result<List<Pokemon>?> {
         return try {
             val response = listService.getPokemonList(limit = 30, offset = 0)
             if (response.isSuccessful) {

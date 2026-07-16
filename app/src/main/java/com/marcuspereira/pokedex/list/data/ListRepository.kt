@@ -1,12 +1,12 @@
 package com.marcuspereira.pokedex.list.data
 
 import com.marcuspereira.pokedex.common.model.Pokemon
-import com.marcuspereira.pokedex.list.data.local.PokemonListLocalDataSource
-import com.marcuspereira.pokedex.list.data.remote.PokemonListRemoteDataSource
+import com.marcuspereira.pokedex.list.data.local.LocalListDataSource
+import com.marcuspereira.pokedex.list.data.remote.RemoteListDataSource
 
 class ListRepository(
-    private val local: PokemonListLocalDataSource,
-    private val remote: PokemonListRemoteDataSource
+    private val local: LocalListDataSource,
+    private val remote: RemoteListDataSource
 ) {
 
     suspend fun getPokemonList(): Result<List<Pokemon>?> {
