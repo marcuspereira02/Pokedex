@@ -7,9 +7,9 @@ import com.marcuspereira.pokedex.list.data.remote.RemoteListDataSource
 class ListRepository(
     private val local: LocalListDataSource,
     private val remote: RemoteListDataSource
-) {
+) : PokemonListRepository {
 
-    suspend fun getPokemonList(): Result<List<Pokemon>?> {
+    override suspend fun getPokemonList(): Result<List<Pokemon>?> {
         return try {
             val result = remote.getPokemonList()
             if (result.isSuccess) {

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.marcuspereira.pokedex.PokedexApplication
 import com.marcuspereira.pokedex.list.data.ListRepository
+import com.marcuspereira.pokedex.list.data.PokemonListRepository
 import com.marcuspereira.pokedex.list.presentation.ui.PokemonListUiData
 import com.marcuspereira.pokedex.list.presentation.ui.PokemonListUiState
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 import java.net.UnknownHostException
 
 class   PokemonListViewModel(
-    private val repository: ListRepository
+    private val repository: PokemonListRepository
 ) : ViewModel() {
     private val _uiAllPokemon = MutableStateFlow(PokemonListUiState())
     val uiAllPokemon: StateFlow<PokemonListUiState> = _uiAllPokemon

@@ -6,7 +6,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import junit.framework.TestCase.assertEquals
 import java.net.UnknownHostException
-import kotlin.math.exp
 
 class PokemonListRepositoryTest {
 
