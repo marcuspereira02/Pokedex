@@ -4,7 +4,7 @@ data class PokemonDetailUiState(
     val data : PokemonDetailUiData? = null,
     val isLoading: Boolean = false,
     val isError: Boolean = false,
-    val errorMessage: String = "Something went thing"
+    val errorMessage: String = "Something went wrong"
 )
 
 data class PokemonDetailUiData(

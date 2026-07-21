@@ -47,7 +47,6 @@ class PokemonSearchViewModel(
                 } else {
                     _uiPokemon.value = PokemonSearchUiState(isError = true)
                 }
-
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 if (ex is UnknownHostException) {

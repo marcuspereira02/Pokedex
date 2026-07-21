@@ -10,6 +10,7 @@ import com.marcuspereira.pokedex.common.data.remote.dto.PokemonDetailDto
 import com.marcuspereira.pokedex.detail.ui.PokemonDetailUiData
 import com.marcuspereira.pokedex.detail.ui.PokemonDetailUiState
 import com.marcuspereira.pokedex.detail.ui.PokemonStatsUiData
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 import java.net.UnknownHostException
 
 class PokemonDetailViewModel(
-    private val service: DetailService
+    private val service: DetailService,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private val _uiPokemon = MutableStateFlow(PokemonDetailUiState())
@@ -26,9 +28,10 @@ class PokemonDetailViewModel(
     fun fetchPokemonDetail(
         id: String
     ) {
-        try {
-            _uiPokemon.value = (PokemonDetailUiState(isLoading = true))
-            viewModelScope.launch(Dispatchers.IO) {
+
+        _uiPokemon.value = (PokemonDetailUiState(isLoading = true))
+        viewModelScope.launch(dispatcher) {
+            try {
                 val response = service.getDetailPokemon(id)
                 if (response.isSuccessful) {
                     val pokemon = response.body()
@@ -39,20 +42,21 @@ class PokemonDetailViewModel(
                 } else {
                     _uiPokemon.value = PokemonDetailUiState(isError = true)
                 }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            if (ex is UnknownHostException) {
-                _uiPokemon.value = PokemonDetailUiState(
-                    isError = true,
-                    errorMessage = "Not internet connection"
-                )
-            } else {
-                _uiPokemon.value = PokemonDetailUiState(
-                    isError = true
-                )
-            }
 
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                if (ex is UnknownHostException) {
+                    _uiPokemon.value = PokemonDetailUiState(
+                        isError = true,
+                        errorMessage = "Not internet connection"
+                    )
+                } else {
+                    _uiPokemon.value = PokemonDetailUiState(
+                        isError = true
+                    )
+                }
+
+            }
         }
     }
 
