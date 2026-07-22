@@ -9,14 +9,17 @@ import com.marcuspereira.pokedex.common.data.remote.api.RetrofitClient
 import com.marcuspereira.pokedex.common.data.remote.dto.PokemonDetailDto
 import com.marcuspereira.pokedex.search.ui.PokemonSearchUiData
 import com.marcuspereira.pokedex.search.ui.PokemonSearchUiState
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.Dispatcher
 import java.net.UnknownHostException
 
 class PokemonSearchViewModel(
-    private val service: DetailService
+    private val service: DetailService,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private val _uiPokemon = MutableStateFlow(PokemonSearchUiState())
@@ -25,7 +28,7 @@ class PokemonSearchViewModel(
     fun fetchPokemon(
         id: String
     ) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             try {
                 _uiPokemon.value = PokemonSearchUiState(isLoading = true)
 

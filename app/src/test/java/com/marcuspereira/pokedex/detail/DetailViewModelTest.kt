@@ -21,7 +21,7 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `Given response is success When get pokemon detail Then return recipe ui data`() {
+    fun `Given response is success When get pokemon detail Then return pokemon ui data`() {
         runTest {
             val pokemon = PokemonDetailDto(
                 id = 1,
@@ -29,7 +29,7 @@ class DetailViewModelTest {
                 types = emptyList(),
                 weight = 1,
                 height = 1,
-                stats = emptyList(),
+                stats = emptyList()
             )
 
             service.pokemonByNameResponse = Response.success(pokemon)
