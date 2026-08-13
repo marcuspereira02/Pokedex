@@ -1,4 +1,4 @@
-package com.marcuspereira.pokedex.common.data.remote.api
+package com.marcuspereira.pokedex.detail.data
 
 import com.marcuspereira.pokedex.common.data.remote.dto.PokemonDetailDto
 import retrofit2.Response

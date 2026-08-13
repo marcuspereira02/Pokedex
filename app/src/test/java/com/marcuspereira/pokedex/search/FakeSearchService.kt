@@ -1,6 +1,6 @@
 package com.marcuspereira.pokedex.search
 
-import com.marcuspereira.pokedex.common.data.remote.api.DetailService
+import com.marcuspereira.pokedex.detail.data.DetailService
 import com.marcuspereira.pokedex.common.data.remote.dto.PokemonDetailDto
 import retrofit2.Response
 

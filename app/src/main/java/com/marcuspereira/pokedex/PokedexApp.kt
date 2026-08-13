@@ -40,14 +40,11 @@ fun PokedexApp(
                 navController = navController
             )
         }
-        composable(
-            route = "searchScreen" + "/{query}",
-            arguments = listOf(navArgument("query") {
-                type = NavType.StringType
-            })
-        ) { backStackEntry ->
-            val querySearch = requireNotNull(backStackEntry.arguments?.getString("query"))
-            PokemonSearchScreen(querySearch, navController, searchViewModel)
+        composable(route = "pokemonSearchScreen"){
+            PokemonSearchScreen(
+                navController = navController,
+                searchViewModel = searchViewModel
+            )
         }
     }
 }

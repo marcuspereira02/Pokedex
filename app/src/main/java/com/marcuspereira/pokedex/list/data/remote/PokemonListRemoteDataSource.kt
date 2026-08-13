@@ -1,6 +1,7 @@
 package com.marcuspereira.pokedex.list.data.remote
 
 import android.accounts.NetworkErrorException
+import com.marcuspereira.pokedex.common.data.remote.api.ListService
 
 import com.marcuspereira.pokedex.common.model.Pokemon
 
@@ -10,7 +11,7 @@ class PokemonListRemoteDataSource(
 
     override suspend fun getPokemonList(): Result<List<Pokemon>?> {
         return try {
-            val response = listService.getPokemonList(limit = 30, offset = 0)
+            val response = listService.getPokemonList(limit = 50, offset = 0)
             if (response.isSuccessful) {
                 val pokemon = response.body()?.results?.map {
                     Pokemon(

@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import coil.request.ImageRequest
 import com.marcuspereira.pokedex.common.utils.extractColorFromDrawable
 import com.marcuspereira.pokedex.common.utils.getTextColor
+import com.marcuspereira.pokedex.components.RetryErrorContent
 import com.marcuspereira.pokedex.detail.PokemonDetailViewModel
 
 @Composable
@@ -92,11 +93,9 @@ fun PokemonDetailScreen(
                     title = "ERROR!"
                 )
 
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = pokemon.errorMessage ?: "",
-                    fontSize = 16.sp,
-                    color = Color.Red
+                RetryErrorContent(
+                    errorMessage = pokemon.errorMessage,
+                    onRetry = { viewModel.fetchPokemonDetail(id = id) }
                 )
             }
         }

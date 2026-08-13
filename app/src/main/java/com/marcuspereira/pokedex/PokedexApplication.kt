@@ -6,7 +6,7 @@ import com.marcuspereira.pokedex.common.data.local.PokedexDataBase
 import com.marcuspereira.pokedex.common.data.remote.api.RetrofitClient
 import com.marcuspereira.pokedex.list.data.ListRepository
 import com.marcuspereira.pokedex.list.data.local.PokemonListLocalDataSource
-import com.marcuspereira.pokedex.list.data.remote.ListService
+import com.marcuspereira.pokedex.common.data.remote.api.ListService
 import com.marcuspereira.pokedex.list.data.remote.PokemonListRemoteDataSource
 
 class PokedexApplication : Application() {

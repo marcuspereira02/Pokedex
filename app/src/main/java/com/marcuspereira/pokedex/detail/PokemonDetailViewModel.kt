@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.marcuspereira.pokedex.common.data.remote.api.DetailService
+import com.marcuspereira.pokedex.detail.data.DetailService
 import com.marcuspereira.pokedex.common.data.remote.api.RetrofitClient
 import com.marcuspereira.pokedex.common.data.remote.dto.PokemonDetailDto
 import com.marcuspereira.pokedex.detail.ui.PokemonDetailUiData

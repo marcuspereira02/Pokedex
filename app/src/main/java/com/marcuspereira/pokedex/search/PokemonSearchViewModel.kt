@@ -4,41 +4,48 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.marcuspereira.pokedex.common.data.remote.api.DetailService
 import com.marcuspereira.pokedex.common.data.remote.api.RetrofitClient
-import com.marcuspereira.pokedex.common.data.remote.dto.PokemonDetailDto
+import com.marcuspereira.pokedex.common.data.remote.api.ListService
 import com.marcuspereira.pokedex.search.ui.PokemonSearchUiData
 import com.marcuspereira.pokedex.search.ui.PokemonSearchUiState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.Dispatcher
 import java.net.UnknownHostException
 
 class PokemonSearchViewModel(
-    private val service: DetailService,
+    private val service: ListService,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private val _uiPokemon = MutableStateFlow(PokemonSearchUiState())
-    val uiPokemon: StateFlow<PokemonSearchUiState> = _uiPokemon
+    val uiPokemon: StateFlow<PokemonSearchUiState> = _uiPokemon.asStateFlow()
 
-    fun fetchPokemon(
-        id: String
-    ) {
+    private var allPokemon: List<PokemonSearchUiData> = emptyList()
+
+    init {
+        loadPokemonList()
+    }
+
+    private fun loadPokemonList() {
         viewModelScope.launch(dispatcher) {
             try {
                 _uiPokemon.value = PokemonSearchUiState(isLoading = true)
 
-                val response = service.getDetailPokemon(id)
+                val response = service.getPokemonList(2000, 0)
                 if (response.isSuccessful) {
-                    val data = response.body()
-                    if (data != null) {
-                        val pokemonUiData = converterPokemonDto(data)
-                        _uiPokemon.value = PokemonSearchUiState(data = pokemonUiData)
+                    allPokemon = response.body()?.results?.map {
+                        PokemonSearchUiData(
+                            id = it.id,
+                            name = it.name,
+                            image = it.imageUrl
+                        )
                     }
+                        .orEmpty()
+                    _uiPokemon.value = PokemonSearchUiState()
 
                 } else if (response.code() == 404) {
 
@@ -55,6 +62,7 @@ class PokemonSearchViewModel(
                 if (ex is UnknownHostException) {
                     _uiPokemon.value = PokemonSearchUiState(
                         isError = true,
+                        isOffline = true,
                         errorMessage = "Not internet connection"
                     )
 
@@ -67,24 +75,46 @@ class PokemonSearchViewModel(
         }
     }
 
-    private fun converterPokemonDto(pokemonDto: PokemonDetailDto): PokemonSearchUiData {
+    fun onQueryChanged(query: String) {
 
-        val pokemonUiData =
-            PokemonSearchUiData(
-                id = pokemonDto.id,
-                name = pokemonDto.name,
-                image = pokemonDto.imageUrl
-            )
-        return pokemonUiData
+        if(_uiPokemon.value.isOffline){
+            return
+        }
+
+        val formattedQuery = query
+            .trim()
+            .lowercase()
+
+        if (formattedQuery.isBlank()) {
+            _uiPokemon.value = PokemonSearchUiState()
+            return
+        }
+
+        val filteredPokemon = allPokemon
+            .filter { pokemon ->
+                pokemon.name.contains(
+                    other = formattedQuery,
+                    ignoreCase = true
+                )
+            }
+            .take(30)
+
+        _uiPokemon.value = PokemonSearchUiState(
+            data = filteredPokemon
+        )
+
     }
 
+    fun retryLoadPokemonList(){
+        loadPokemonList()
+    }
 
     companion object {
 
         val factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                val service = RetrofitClient.retrofitInstance.create(DetailService::class.java)
+                val service = RetrofitClient.retrofitInstance.create(ListService::class.java)
                 return PokemonSearchViewModel(
                     service
                 ) as T

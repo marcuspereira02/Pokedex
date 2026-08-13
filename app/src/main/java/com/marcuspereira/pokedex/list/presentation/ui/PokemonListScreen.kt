@@ -1,5 +1,6 @@
 package com.marcuspereira.pokedex.list.presentation.ui
 
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +32,7 @@ import coil.compose.AsyncImage
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,7 +43,6 @@ import androidx.navigation.NavHostController
 import coil.request.ImageRequest
 import com.marcuspereira.pokedex.R
 import com.marcuspereira.pokedex.common.utils.extractColorFromDrawable
-import com.marcuspereira.pokedex.components.ERSearchBar
 import com.marcuspereira.pokedex.list.presentation.PokemonListViewModel
 
 @Composable
@@ -53,11 +56,8 @@ fun PokemonListScreen(viewModel: PokemonListViewModel, navController: NavHostCon
             navController.navigate(route = "pokemonDetail/${itemClicked.id}")
 
         },
-        onSearchClicked = { query ->
-            val tempCleanQuery = query.trim()
-            if (tempCleanQuery.isNotEmpty()) {
-                navController.navigate(route = "searchScreen/${tempCleanQuery}")
-            }
+        onSearchClick = {
+                navController.navigate(route = "pokemonSearchScreen")
         }
     )
 }
@@ -67,7 +67,7 @@ fun PokemonListScreen(viewModel: PokemonListViewModel, navController: NavHostCon
 private fun PokemonListContent(
     pokemonListUiState: PokemonListUiState,
     onClick: (PokemonListUiData) -> Unit,
-    onSearchClicked: (String) -> Unit,
+    onSearchClick: () -> Unit,
 
     ) {
 
@@ -96,33 +96,21 @@ private fun PokemonListContent(
                 fontSize = 24.sp,
                 text = "Pokedex"
             )
+
+            Spacer(
+                modifier = Modifier.weight(1f)
+            )
+
+            IconButton(onClick = onSearchClick) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search Pokémon"
+                )
+            }
         }
 
-        SearchSession(
-            query = query,
-            onValueChange = {
-                query = it
-            },
-            onSearchClicked = onSearchClicked
-        )
         PokemonListContentGate(pokemonListUiState = pokemonListUiState, onClick = onClick)
     }
-}
-
-@Composable
-private fun SearchSession(
-    query: String,
-    onValueChange: (String) -> Unit,
-    onSearchClicked: (String) -> Unit
-) {
-    ERSearchBar(
-        query = query,
-        placeHolder = "Find a Pokémon",
-        onValueChange = onValueChange,
-        onSearchClicked = {
-            onSearchClicked.invoke(query)
-        }
-    )
 }
 
 @Composable
@@ -206,4 +194,5 @@ private fun PokemonCard(
             )
         }
     }
+
 }

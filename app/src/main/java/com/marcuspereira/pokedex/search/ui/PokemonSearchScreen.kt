@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -21,11 +23,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,30 +46,51 @@ import coil.request.ImageRequest
 import com.marcuspereira.pokedex.R
 import com.marcuspereira.pokedex.common.utils.extractColorFromDrawable
 import com.marcuspereira.pokedex.common.utils.getTextColor
+import com.marcuspereira.pokedex.components.ERSearchBar
+import com.marcuspereira.pokedex.components.RetryErrorContent
+import com.marcuspereira.pokedex.components.TryAgainButton
 import com.marcuspereira.pokedex.search.PokemonSearchViewModel
 
 @Composable
 fun PokemonSearchScreen(
-    querySearch: String,
     navController: NavHostController,
     searchViewModel: PokemonSearchViewModel
 ) {
 
     val pokemon by searchViewModel.uiPokemon.collectAsState()
 
-    val queryFormatted = querySearch.lowercase()
-
-    LaunchedEffect(queryFormatted) {
-        searchViewModel.fetchPokemon(queryFormatted)
+    var query by rememberSaveable {
+        mutableStateOf("")
     }
 
-    when {
-        pokemon.isLoading -> {
-            Column {
-                PokemonSearchHeader(
-                    navController = navController,
-                    query = querySearch
-                )
+
+    Column(modifier = Modifier.fillMaxSize()) {
+
+
+        PokemonSearchHeader(
+            navController = navController,
+        )
+
+        Spacer(
+            modifier = Modifier.size(8.dp)
+        )
+
+        SearchSession(
+            query = query,
+            onValueChange = { newQuery ->
+                query = newQuery
+                searchViewModel.onQueryChanged(newQuery)
+            },
+            onSearchClicked = {}
+        )
+
+        Spacer(
+            modifier = Modifier.size(16.dp)
+        )
+
+        when {
+            pokemon.isLoading -> {
+
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
@@ -74,62 +98,60 @@ fun PokemonSearchScreen(
                     CircularProgressIndicator()
                 }
             }
-        }
 
-        pokemon.isError -> {
-            Column {
-                PokemonSearchHeader(
-                    navController = navController,
-                    query = "ERROR!"
+            pokemon.isError -> {
+                RetryErrorContent (
+                    pokemon.errorMessage,
+                    onRetry = { searchViewModel.retryLoadPokemonList() }
                 )
+            }
 
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = pokemon.errorMessage,
-                    fontSize = 16.sp,
-                    color = Color.Red
-                )
+            query.isBlank() -> {
+                SearchEmptyContent()
+            }
 
-                Box(
+            pokemon.data.isEmpty() -> {
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.sad_pokeball),
-                        contentDescription = "Sad Pokeball Image",
-                        tint = Color.Unspecified
+                    Text(
+                        modifier = Modifier.padding(16.dp),
+                        text = "No Pokémon found.",
                     )
                 }
             }
-        }
 
-        pokemon.data != null -> {
-            PokemonSearchContent(
-                navController, pokemon.data,
-                querySearch
-            ) { itemClicked ->
-                navController.navigate(route = "pokemonDetail/${itemClicked?.id}")
+            else -> {
+
+                LazyColumn {
+                    items(
+                        items = pokemon.data,
+                    ) { item ->
+                        PokemonSearchContent(
+                            pokemonSearchUiData = item,
+                            onClick = { itemClicked ->
+                                itemClicked?.id?.let { id ->
+                                    navController.navigate(route = "pokemonDetail/$id")
+                                }
+                            }
+                        )
+                    }
+                }
             }
         }
     }
 }
 
-
 @Composable
 private fun PokemonSearchContent(
-    navController: NavController,
     pokemonSearchUiData: PokemonSearchUiData?,
-    query: String,
     onClick: (PokemonSearchUiData?) -> Unit
 ) {
 
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        PokemonSearchHeader(
-            navController,
-            query
-        )
 
         PokemonSearchCard(
             pokemonSearchUiData,
@@ -211,10 +233,7 @@ private fun PokemonSearchCard(
 @Composable
 private fun PokemonSearchHeader(
     navController: NavController,
-    query: String
 ) {
-
-    val queryFormatted = query.replaceFirstChar { it.uppercase() }
 
     Row(
         modifier = Modifier
@@ -230,7 +249,40 @@ private fun PokemonSearchHeader(
         }
         Text(
             modifier = Modifier.padding(start = 8.dp),
-            text = queryFormatted
+            text = "Search Pokémon"
         )
     }
 }
+
+@Composable
+fun SearchSession(
+    query: String,
+    onValueChange: (String) -> Unit,
+    onSearchClicked: (String) -> Unit
+) {
+    ERSearchBar(
+        query = query,
+        placeHolder = "Search by name",
+        onValueChange = onValueChange,
+        onSearchClicked = {
+            onSearchClicked.invoke(query)
+        }
+    )
+}
+
+@Composable
+private fun SearchEmptyContent() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Start typing to search",
+            color = Color.Gray,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
