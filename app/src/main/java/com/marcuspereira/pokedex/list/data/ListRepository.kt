@@ -19,6 +19,7 @@ class ListRepository(
                 }
                 Result.success(local.getPokemonList())
             } else {
+
                 val localData = local.getPokemonList()
                 if (localData.isEmpty()) {
                     return result

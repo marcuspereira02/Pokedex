@@ -2,22 +2,26 @@ package com.marcuspereira.pokedex.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.marcuspereira.pokedex.common.data.remote.api.RetrofitClient
-import com.marcuspereira.pokedex.common.data.remote.api.ListService
+import com.marcuspereira.pokedex.PokedexApplication
+import com.marcuspereira.pokedex.common.model.Pokemon
+import com.marcuspereira.pokedex.search.data.PokemonSearchRepository
 import com.marcuspereira.pokedex.search.ui.PokemonSearchUiData
 import com.marcuspereira.pokedex.search.ui.PokemonSearchUiState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.net.UnknownHostException
 
 class PokemonSearchViewModel(
-    private val service: ListService,
+    private val repository: PokemonSearchRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
@@ -32,44 +36,29 @@ class PokemonSearchViewModel(
 
     private fun loadPokemonList() {
         viewModelScope.launch(dispatcher) {
-            try {
-                _uiPokemon.value = PokemonSearchUiState(isLoading = true)
+            _uiPokemon.value = PokemonSearchUiState(isLoading = true)
 
-                val response = service.getPokemonList(2000, 0)
-                if (response.isSuccessful) {
-                    allPokemon = response.body()?.results?.map {
-                        PokemonSearchUiData(
-                            id = it.id,
-                            name = it.name,
-                            image = it.imageUrl
-                        )
-                    }
-                        .orEmpty()
-                    _uiPokemon.value = PokemonSearchUiState()
-
-                } else if (response.code() == 404) {
-
-                    _uiPokemon.value = PokemonSearchUiState(
-                        isError = true,
-                        errorMessage = "No Pokémon found. Please try again."
+            val result = repository.getSearchPokemonList()
+            if (result.isSuccess) {
+                allPokemon = result.getOrNull()?.map {
+                    PokemonSearchUiData(
+                        id = it.id,
+                        name = it.name,
+                        image = it.image
                     )
-
-                } else {
-                    _uiPokemon.value = PokemonSearchUiState(isError = true)
                 }
-            } catch (ex: Exception) {
-                ex.printStackTrace()
+                    .orEmpty()
+                _uiPokemon.value = PokemonSearchUiState()
+
+            } else {
+                val ex = result.exceptionOrNull()
                 if (ex is UnknownHostException) {
                     _uiPokemon.value = PokemonSearchUiState(
                         isError = true,
-                        isOffline = true,
                         errorMessage = "Not internet connection"
                     )
-
                 } else {
-                    _uiPokemon.value = PokemonSearchUiState(
-                        isError = true
-                    )
+                    _uiPokemon.value = PokemonSearchUiState(isError = true)
                 }
             }
         }
@@ -77,7 +66,7 @@ class PokemonSearchViewModel(
 
     fun onQueryChanged(query: String) {
 
-        if(_uiPokemon.value.isOffline){
+        if (_uiPokemon.value.isOffline) {
             return
         }
 
@@ -105,8 +94,62 @@ class PokemonSearchViewModel(
 
     }
 
-    fun retryLoadPokemonList(){
+    fun retryLoadPokemonList() {
         loadPokemonList()
+    }
+
+    fun savePokemonHistory(pokemonSearchUiData: PokemonSearchUiData) {
+        viewModelScope.launch {
+
+            val pokemon = Pokemon(
+                id = pokemonSearchUiData.id,
+                name = pokemonSearchUiData.name,
+                image = pokemonSearchUiData.image
+            )
+
+            repository.savePokemonHistory(pokemon)
+        }
+    }
+
+    fun searchHistoryUiData(): Flow<List<PokemonSearchUiData>> {
+
+        return repository.observeSearchLocalList().map { pokemonList ->
+            pokemonList.map {
+                PokemonSearchUiData(
+                    id = it.id,
+                    name = it.name,
+                    image = it.image
+                )
+            }
+        }
+    }
+
+    fun deletePokemon(pokemonSearchUiData: PokemonSearchUiData) {
+        viewModelScope.launch {
+
+            val pokemon = Pokemon(
+                id = pokemonSearchUiData.id,
+                name = pokemonSearchUiData.name,
+                image = pokemonSearchUiData.image
+            )
+
+            repository.deletePokemonHistory(pokemon)
+        }
+    }
+
+    fun deleteAllPokemon(pokemonUiDataList: List<PokemonSearchUiData>) {
+        viewModelScope.launch {
+
+            val pokemonList = pokemonUiDataList.map {
+                Pokemon(
+                    id = it.id,
+                    name = it.name,
+                    image = it.image
+                )
+            }
+
+            repository.deleteAllHistory(pokemonList)
+        }
     }
 
     companion object {
@@ -114,9 +157,9 @@ class PokemonSearchViewModel(
         val factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                val service = RetrofitClient.retrofitInstance.create(ListService::class.java)
+                val application = checkNotNull(extras[APPLICATION_KEY])
                 return PokemonSearchViewModel(
-                    service
+                    repository = (application as PokedexApplication).searchRepository
                 ) as T
             }
         }

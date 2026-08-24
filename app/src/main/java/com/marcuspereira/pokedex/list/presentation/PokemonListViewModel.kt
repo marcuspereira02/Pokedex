@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.marcuspereira.pokedex.PokedexApplication
-import com.marcuspereira.pokedex.list.data.ListRepository
 import com.marcuspereira.pokedex.list.data.PokemonListRepository
 import com.marcuspereira.pokedex.list.presentation.ui.PokemonListUiData
 import com.marcuspereira.pokedex.list.presentation.ui.PokemonListUiState
@@ -66,7 +65,7 @@ class   PokemonListViewModel(
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                 val application = checkNotNull(extras[APPLICATION_KEY])
                 return PokemonListViewModel(
-                    repository = (application as PokedexApplication).repository
+                    repository = (application as PokedexApplication).listRepository
                 ) as T
             }
         }

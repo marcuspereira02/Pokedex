@@ -1,6 +1,7 @@
 package com.marcuspereira.pokedex.search.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,12 +17,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,28 +36,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.marcuspereira.pokedex.R
 import com.marcuspereira.pokedex.common.utils.extractColorFromDrawable
 import com.marcuspereira.pokedex.common.utils.getTextColor
 import com.marcuspereira.pokedex.components.ERSearchBar
 import com.marcuspereira.pokedex.components.RetryErrorContent
-import com.marcuspereira.pokedex.components.TryAgainButton
 import com.marcuspereira.pokedex.search.PokemonSearchViewModel
 
 @Composable
 fun PokemonSearchScreen(
-    navController: NavHostController,
-    searchViewModel: PokemonSearchViewModel
+    navController: NavHostController, searchViewModel: PokemonSearchViewModel
 ) {
 
     val pokemon by searchViewModel.uiPokemon.collectAsState()
@@ -63,26 +61,29 @@ fun PokemonSearchScreen(
         mutableStateOf("")
     }
 
+    val listHistory by searchViewModel.searchHistoryUiData().collectAsState(emptyList())
 
     Column(modifier = Modifier.fillMaxSize()) {
 
 
         PokemonSearchHeader(
-            navController = navController,
+            onBackClicked = {
+                if (query.isNotBlank()) {
+                    query = ""
+                } else {
+                    navController.popBackStack()
+                }
+            }
         )
 
         Spacer(
             modifier = Modifier.size(8.dp)
         )
 
-        SearchSession(
-            query = query,
-            onValueChange = { newQuery ->
-                query = newQuery
-                searchViewModel.onQueryChanged(newQuery)
-            },
-            onSearchClicked = {}
-        )
+        SearchSession(query = query, onValueChange = { newQuery ->
+            query = newQuery
+            searchViewModel.onQueryChanged(newQuery)
+        }, onSearchClicked = {})
 
         Spacer(
             modifier = Modifier.size(16.dp)
@@ -92,21 +93,32 @@ fun PokemonSearchScreen(
             pokemon.isLoading -> {
 
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
                 }
             }
 
             pokemon.isError -> {
-                RetryErrorContent (
-                    pokemon.errorMessage,
-                    onRetry = { searchViewModel.retryLoadPokemonList() }
-                )
+                RetryErrorContent(
+                    pokemon.errorMessage, onRetry = { searchViewModel.retryLoadPokemonList() })
             }
 
-            query.isBlank() -> {
+            query.isBlank() && listHistory.isNotEmpty() -> {
+                SearchHistoryContent(
+                    onClicked = { searchViewModel.deleteAllPokemon(listHistory) },
+                    pokemon = listHistory,
+                    onClickedCard = { pokemon ->
+                        pokemon.id.let { id ->
+                            navController.navigate(route = "pokemonDetail/$id")
+                        }
+                    },
+                    onDeleteClicked = { pokemon ->
+                        searchViewModel.deletePokemon(pokemon)
+                    })
+            }
+
+            query.isBlank() && listHistory.isEmpty() -> {
                 SearchEmptyContent()
             }
 
@@ -128,14 +140,12 @@ fun PokemonSearchScreen(
                     items(
                         items = pokemon.data,
                     ) { item ->
-                        PokemonSearchContent(
-                            pokemonSearchUiData = item,
-                            onClick = { itemClicked ->
-                                itemClicked?.id?.let { id ->
-                                    navController.navigate(route = "pokemonDetail/$id")
-                                }
+                        PokemonSearchContent(pokemonSearchUiData = item, onClick = { itemClicked ->
+                            itemClicked?.id?.let { id ->
+                                navController.navigate(route = "pokemonDetail/$id")
                             }
-                        )
+                            searchViewModel.savePokemonHistory(item)
+                        }, onDeleteClicked = {})
                     }
                 }
             }
@@ -146,7 +156,8 @@ fun PokemonSearchScreen(
 @Composable
 private fun PokemonSearchContent(
     pokemonSearchUiData: PokemonSearchUiData?,
-    onClick: (PokemonSearchUiData?) -> Unit
+    onClick: (PokemonSearchUiData?) -> Unit,
+    onDeleteClicked: () -> Unit
 ) {
 
     Column(
@@ -154,8 +165,7 @@ private fun PokemonSearchContent(
     ) {
 
         PokemonSearchCard(
-            pokemonSearchUiData,
-            onClick
+            pokemonSearchUiData, onClick, false, onDeleteClicked
         )
     }
 }
@@ -163,7 +173,9 @@ private fun PokemonSearchContent(
 @Composable
 private fun PokemonSearchCard(
     pokemon: PokemonSearchUiData?,
-    onClick: (PokemonSearchUiData?) -> Unit
+    onClick: (PokemonSearchUiData?) -> Unit,
+    showDeleteButton: Boolean = false,
+    onDeleteClicked: () -> Unit
 ) {
 
     var backgroundColor by remember { mutableStateOf(Color.White) }
@@ -187,11 +199,8 @@ private fun PokemonSearchCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(pokemon?.image)
-                    .allowHardware(false)
-                    .crossfade(true)
-                    .build(),
+                model = ImageRequest.Builder(LocalContext.current).data(pokemon?.image)
+                    .allowHardware(false).crossfade(true).build(),
                 contentDescription = "${pokemon?.name} Image",
                 modifier = Modifier
                     .size(100.dp)
@@ -199,15 +208,12 @@ private fun PokemonSearchCard(
                 onSuccess = { success ->
                     val drawable = success.result.drawable
                     backgroundColor = extractColorFromDrawable(drawable)
-                }
-            )
+                })
 
             Spacer(modifier = Modifier.width(20.dp))
 
             Column(
-                modifier = Modifier
-                    .weight(1f),
-                horizontalAlignment = Alignment.Start
+                modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start
             ) {
                 Text(
                     text = name ?: "",
@@ -226,13 +232,25 @@ private fun PokemonSearchCard(
                     color = getTextColor(backgroundColor).copy(alpha = 0.7f)
                 )
             }
+
+            if (showDeleteButton) {
+                IconButton(onClick = onDeleteClicked) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Remove from history",
+                        tint = getTextColor(backgroundColor)
+                    )
+                }
+            }
+
+
         }
     }
 }
 
 @Composable
 private fun PokemonSearchHeader(
-    navController: NavController,
+    onBackClicked: () -> Unit
 ) {
 
     Row(
@@ -241,24 +259,23 @@ private fun PokemonSearchHeader(
             .statusBarsPadding(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { navController.popBackStack() }) {
+        IconButton(
+            onClick =
+                onBackClicked
+        ) {
             Icon(
-                imageVector = Icons.Filled.ArrowBack,
-                contentDescription = "Back button"
+                imageVector = Icons.Filled.ArrowBack, contentDescription = "Back button"
             )
         }
         Text(
-            modifier = Modifier.padding(start = 8.dp),
-            text = "Search Pokémon"
+            modifier = Modifier.padding(start = 8.dp), text = "Search Pokémon"
         )
     }
 }
 
 @Composable
 fun SearchSession(
-    query: String,
-    onValueChange: (String) -> Unit,
-    onSearchClicked: (String) -> Unit
+    query: String, onValueChange: (String) -> Unit, onSearchClicked: (String) -> Unit
 ) {
     ERSearchBar(
         query = query,
@@ -266,8 +283,7 @@ fun SearchSession(
         onValueChange = onValueChange,
         onSearchClicked = {
             onSearchClicked.invoke(query)
-        }
-    )
+        })
 }
 
 @Composable
@@ -275,14 +291,56 @@ private fun SearchEmptyContent() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(32.dp),
-        contentAlignment = Alignment.Center
+            .padding(32.dp), contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Start typing to search",
-            color = Color.Gray,
-            textAlign = TextAlign.Center
+            text = "Start typing to search", color = Color.Gray, textAlign = TextAlign.Center
         )
+    }
+}
+
+@Composable
+private fun SearchHistoryContent(
+    onClicked: () -> Unit,
+    pokemon: List<PokemonSearchUiData>,
+    onClickedCard: (PokemonSearchUiData) -> Unit,
+    onDeleteClicked: (PokemonSearchUiData) -> Unit
+) {
+
+    Column(modifier = Modifier.fillMaxSize()) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp, end = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Text(
+                text = "Search History", modifier = Modifier.padding(start = 8.dp)
+            )
+
+            TextButton(
+                onClick = {
+                    onClicked()
+                }) {
+                Text("Clean History")
+            }
+        }
+
+
+        LazyColumn {
+            items(
+                items = pokemon, key = { item -> item.id }) { item ->
+                PokemonSearchCard(
+                    pokemon = item, onClick = {
+                        onClickedCard(item)
+                    }, showDeleteButton = true,
+                    onDeleteClicked = { (onDeleteClicked(item)) }
+                )
+            }
+        }
     }
 }
 
