@@ -1,8 +1,8 @@
 package com.marcuspereira.pokedex.list.presentation.ui
 
-import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -43,6 +43,7 @@ import androidx.navigation.NavHostController
 import coil.request.ImageRequest
 import com.marcuspereira.pokedex.R
 import com.marcuspereira.pokedex.common.utils.extractColorFromDrawable
+import com.marcuspereira.pokedex.components.RetryErrorContent
 import com.marcuspereira.pokedex.list.presentation.PokemonListViewModel
 
 @Composable
@@ -50,67 +51,50 @@ fun PokemonListScreen(viewModel: PokemonListViewModel, navController: NavHostCon
 
     val listPokemon by viewModel.uiAllPokemon.collectAsState()
 
-    PokemonListContent(
-        pokemonListUiState = listPokemon,
-        onClick = { itemClicked ->
-            navController.navigate(route = "pokemonDetail/${itemClicked.id}")
+    Column(modifier = Modifier.fillMaxSize()) {
 
-        },
-        onSearchClick = {
-                navController.navigate(route = "pokemonSearchScreen")
+        HeaderList {
+            navController.navigate(route = "pokemonSearchScreen")
         }
-    )
-}
 
+        Spacer(Modifier.size(8.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+
+        when {
+            listPokemon.isLoading -> {
+                CircularProgressIndicator()
+            }
+
+            listPokemon.isError ->
+                RetryErrorContent(
+                listPokemon.errorMessage
+            ) {
+                viewModel.retryFetchPokemon()
+            }
+
+            else -> PokemonListContent(
+                pokemonListUiState = listPokemon,
+                onClick = { itemClicked ->
+                    navController.navigate(route = "pokemonDetail/${itemClicked.id}")
+                }
+            )
+        }
+    }
+}
+}
 
 @Composable
 private fun PokemonListContent(
     pokemonListUiState: PokemonListUiState,
     onClick: (PokemonListUiData) -> Unit,
-    onSearchClick: () -> Unit,
+) {
 
-    ) {
-
-    Column(modifier = Modifier.fillMaxSize()) {
-
-        var query by remember { mutableStateOf("") }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-
-            ) {
-
-            Icon(
-                painter = painterResource(id = R.drawable.pokeball),
-                contentDescription = "Pokeball Image",
-                tint = Color.Unspecified
-            )
-
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-                text = "Pokedex"
-            )
-
-            Spacer(
-                modifier = Modifier.weight(1f)
-            )
-
-            IconButton(onClick = onSearchClick) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search Pokémon"
-                )
-            }
-        }
-
-        PokemonListContentGate(pokemonListUiState = pokemonListUiState, onClick = onClick)
-    }
+    PokemonListContentGate(pokemonListUiState = pokemonListUiState, onClick = onClick)
 }
 
 @Composable
@@ -194,5 +178,46 @@ private fun PokemonCard(
             )
         }
     }
+}
 
+@Composable
+private fun HeaderList(
+    onSearchClick: () -> Unit
+) {
+    Column {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+
+            ) {
+
+            Icon(
+                painter = painterResource(id = R.drawable.pokeball),
+                contentDescription = "Pokeball Image",
+                tint = Color.Unspecified
+            )
+
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                text = "Pokedex"
+            )
+
+            Spacer(
+                modifier = Modifier.weight(1f)
+            )
+
+            IconButton(onClick = onSearchClick) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search Pokémon"
+                )
+            }
+        }
+    }
 }

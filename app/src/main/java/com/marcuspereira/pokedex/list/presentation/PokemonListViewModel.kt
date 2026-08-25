@@ -58,7 +58,9 @@ class   PokemonListViewModel(
         }
     }
 
-
+    fun retryFetchPokemon(){
+        fetchAllPokemon()
+    }
     companion object {
         val factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
