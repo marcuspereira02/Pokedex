@@ -159,12 +159,12 @@ private fun PokemonDetailContent(
             )
         }
 
-        StatusBars(pokemon)
+        PokemonStatus(pokemon)
     }
 }
 
 @Composable
-private fun StatusBars(
+private fun PokemonStatus(
     pokemon: PokemonDetailUiData?,
 ) {
 
@@ -207,8 +207,7 @@ private fun StatusBars(
                 Text(
                     text = abbreviateStatName(stat.name),
                     modifier = Modifier.width(45.dp),
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    fontWeight = FontWeight.Bold
                 )
 
                 Box(
@@ -216,7 +215,7 @@ private fun StatusBars(
                         .fillMaxWidth()
                         .height(22.dp)
                         .clip(RoundedCornerShape(50))
-                        .background(Color.White)
+                        .background(Color.LightGray)
                 ) {
 
                     Box(

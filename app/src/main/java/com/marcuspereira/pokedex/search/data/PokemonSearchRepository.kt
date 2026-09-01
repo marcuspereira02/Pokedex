@@ -1,13 +1,13 @@
 package com.marcuspereira.pokedex.search.data
 
 import com.marcuspereira.pokedex.common.model.Pokemon
-import com.marcuspereira.pokedex.search.data.local.PokemonSearchLocalDataSource
-import com.marcuspereira.pokedex.search.data.remote.PokemonSearchRemoteDataSource
+import com.marcuspereira.pokedex.search.data.local.LocalSearchDataSource
+import com.marcuspereira.pokedex.search.data.remote.SearchRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 
 class PokemonSearchRepository(
-    private val local: PokemonSearchLocalDataSource,
-    private val remote: PokemonSearchRemoteDataSource
+    private val local: LocalSearchDataSource,
+    private val remote: SearchRemoteDataSource
 ) : SearchPokemonRepository {
 
     override suspend fun getSearchPokemonList(): Result<List<Pokemon>?> {

@@ -99,11 +99,6 @@ fun PokemonSearchScreen(
                 }
             }
 
-            pokemon.isError -> {
-                RetryErrorContent(
-                    pokemon.errorMessage, onRetry = { searchViewModel.retryLoadPokemonList() })
-            }
-
             query.isBlank() && listHistory.isNotEmpty() -> {
                 SearchHistoryContent(
                     onClicked = { searchViewModel.deleteAllPokemon(listHistory) },
@@ -118,8 +113,17 @@ fun PokemonSearchScreen(
                     })
             }
 
+            pokemon.isError -> {
+                RetryErrorContent(
+                    pokemon.errorMessage, onRetry = { searchViewModel.retryLoadPokemonList() })
+            }
+
             query.isBlank() && listHistory.isEmpty() -> {
                 SearchEmptyContent()
+            }
+
+            pokemon.isOffline -> {
+
             }
 
             pokemon.data.isEmpty() -> {

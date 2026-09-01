@@ -17,7 +17,7 @@ class PokemonListRepositoryTest {
     }
 
     @Test
-    fun `Given result is success When get all pokemons Then update local items`() {
+    fun `Given result is success When get all pokemon's Then update local items`() {
 
         runTest {
             val list = listOf(
@@ -42,7 +42,7 @@ class PokemonListRepositoryTest {
     }
 
     @Test
-    fun `Given remote failure and no local data When get all pokemons Then return remote error`() {
+    fun `Given remote failure and no local data When get all pokemon's Then return remote error`() {
         runTest {
 
             val resultRemote = Result.failure<List<Pokemon>>(UnknownHostException())
@@ -60,7 +60,7 @@ class PokemonListRepositoryTest {
     }
 
     @Test
-    fun `Given no internet connection When get all pokemons Then return local data`() {
+    fun `Given no internet connection When get all pokemon's Then return local data`() {
         runTest {
 
             val list = listOf(
@@ -83,7 +83,7 @@ class PokemonListRepositoryTest {
     }
 
     @Test
-    fun `Given unknown error When get all pokemons Then return remote result`() {
+    fun `Given unknown error When get all pokemon's Then return remote result`() {
         runTest {
             val remoteResult = Result.failure<List<Pokemon>>(UnknownError())
 

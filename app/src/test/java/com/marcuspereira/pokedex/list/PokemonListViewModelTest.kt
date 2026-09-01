@@ -20,7 +20,7 @@ class PokemonListViewModelTest {
     }
 
     @Test
-    fun `Given fresh viewModel When collecting pokemons Then assert expected value`() {
+    fun `Given fresh viewModel When collecting pokemon list Then assert expected value`() {
         runTest {
 
             val list = listOf(
@@ -55,7 +55,7 @@ class PokemonListViewModelTest {
     }
 
     @Test
-    fun `Given no internet When get pokemons Then emits network error`() {
+    fun `Given no internet When get pokemon list Then emits network error`() {
         runTest {
 
             repository.listPokemon = Result.failure(UnknownHostException())
@@ -73,7 +73,7 @@ class PokemonListViewModelTest {
     }
 
     @Test
-    fun `Given unknown exception When get pokemons Then emits unknown error`() {
+    fun `Given unknown exception When get pokemon list Then emits unknown error`() {
         runTest {
             repository.listPokemon = Result.failure(UnknownError())
 

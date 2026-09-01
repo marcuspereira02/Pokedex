@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.marcuspereira.pokedex.PokedexApplication
 import com.marcuspereira.pokedex.common.model.Pokemon
 import com.marcuspereira.pokedex.search.data.PokemonSearchRepository
+import com.marcuspereira.pokedex.search.data.SearchPokemonRepository
 import com.marcuspereira.pokedex.search.ui.PokemonSearchUiData
 import com.marcuspereira.pokedex.search.ui.PokemonSearchUiState
 import kotlinx.coroutines.CoroutineDispatcher
@@ -21,7 +22,7 @@ import kotlinx.coroutines.launch
 import java.net.UnknownHostException
 
 class PokemonSearchViewModel(
-    private val repository: PokemonSearchRepository,
+    private val repository: SearchPokemonRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
@@ -55,6 +56,7 @@ class PokemonSearchViewModel(
                 if (ex is UnknownHostException) {
                     _uiPokemon.value = PokemonSearchUiState(
                         isError = true,
+                        isOffline = true,
                         errorMessage = "Not internet connection"
                     )
                 } else {
@@ -99,7 +101,7 @@ class PokemonSearchViewModel(
     }
 
     fun savePokemonHistory(pokemonSearchUiData: PokemonSearchUiData) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher){
 
             val pokemon = Pokemon(
                 id = pokemonSearchUiData.id,
@@ -125,7 +127,7 @@ class PokemonSearchViewModel(
     }
 
     fun deletePokemon(pokemonSearchUiData: PokemonSearchUiData) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
 
             val pokemon = Pokemon(
                 id = pokemonSearchUiData.id,
@@ -138,7 +140,7 @@ class PokemonSearchViewModel(
     }
 
     fun deleteAllPokemon(pokemonUiDataList: List<PokemonSearchUiData>) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
 
             val pokemonList = pokemonUiDataList.map {
                 Pokemon(
