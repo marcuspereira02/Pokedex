@@ -5,9 +5,10 @@ Pokedex é um aplicativo Android desenvolvido em kotlin que permite pesquisar Po
 
 ---
 ## ✨ Funcionalidades
-- Pesquisa de Pokémon por nome
+- Pesquisa de Pokémon por nome em tempo real
 - Exibição de informações detalhadas
 - Tratamento de estados de carregamento e erro
+- Histórico de pesquisa
 ---
 ## 🧱 Arquitetura e Padrões
 O projeto foi desenvolvido utilizando a arquitetura MVVM para separar responsabilidades e facilitar manutenção e testes.
@@ -31,7 +32,7 @@ Exemplos de cenários testados:
 ---
 ## :camera_flash: Screenshots
 <!-- You can add more screenshots here if you like -->
-<img src="https://github.com/user-attachments/assets/e36480ab-a84e-45bc-9f59-0049261756d5" width=260/> <img src="https://github.com/user-attachments/assets/374f31e3-3fd1-4f01-b44b-76f7a5ea52a4" width=260/> <img src="https://github.com/user-attachments/assets/1648940d-bc88-4d8b-88fa-7d391b080648" width=260/> 
+<img src="https://github.com/user-attachments/assets/555f0da4-a35c-4141-8f37-f4e8a6e6fe31" width=260/> <img src="https://github.com/user-attachments/assets/5f378fd8-3f62-4084-80c5-f7db95b4e5ca" width=260/> <img src="https://github.com/user-attachments/assets/a07ed8fb-23be-4d99-ab39-6ef4fdf78cf8" width=260/> 
 
 ---
 
